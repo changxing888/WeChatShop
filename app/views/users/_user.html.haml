@@ -1,0 +1,6 @@
+%li
+	= gravatar_for user, size:50
+	= user.first_name+" "+user.last_name
+
+	- if admin_user?(current_user) && !current_user?(user) && !admin_user?(user)
+		| #{link_to "delete", user, method: :delete, data:{confirm: "Are you sure?"}}

@@ -5,14 +5,14 @@
       %ul.nav.navbar-nav.pull-right
         %li= link_to "Home", root_path
         - if user_signed_in?
-          Logged in as 
-          = succeed "." do
-            %strong= current_user.email
+          - if current_user.admin == 1
+            %li= link_to "Users", users_path
           %li.dropdown
             %a.dropdown-toggle{href:'#', data:{toggle:"dropdown"}}
-              Account
+              %strong= current_user.first_name+" "+current_user.last_name
               %b.caret
             %ul.dropdown-menu
+              %li= link_to "Profile", edit_registration_path(current_user)
               %li.divider
               %li= link_to "Log out", destroy_user_session_path, method: :delete
         - else

@@ -1,0 +1,12 @@
+%h1 All users
+
+/ .row
+/   .col-md-6.col-md-offset-3
+/     = label_tag :start_month
+/     = select_tag :start_month, options_for_select(@months.reverse, @selected_month)
+
+/     = label_tag :end_month
+/     = select_tag :end_month, options_for_select(@months.reverse, @selected_month)
+
+%ul.users
+  = render @users
