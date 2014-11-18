@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
-ruby '2.1.4'
+ruby '2.1.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.1.7'
+gem 'rails', '4.1.2'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
@@ -12,9 +12,9 @@ gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 
+gem 'mysql2'
+
 gem 'bootstrap-sass'
-gem 'mongoid' #, git: 'https://github.com/mongoid/mongoid.git'
-gem 'bson_ext'
 gem 'haml-rails'
 gem 'haml2slim'
 gem 'html2haml'
