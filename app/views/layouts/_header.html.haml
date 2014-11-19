@@ -5,14 +5,15 @@
       %ul.nav.navbar-nav.pull-right
         %li= link_to "Home", root_path
         - if user_signed_in?
-          - if current_user.admin == 1
+          - if current_user.role == '1'
             %li= link_to "Users", users_path
+            %li= link_to "ChatHisotry", chathistories_path
           %li.dropdown
             %a.dropdown-toggle{href:'#', data:{toggle:"dropdown"}}
-              %strong= current_user.first_name+" "+current_user.last_name
+              %strong= current_user.email
               %b.caret
             %ul.dropdown-menu
-              %li= link_to "Profile", edit_registration_path(current_user)
+              %li= link_to "Profile", edit_registration_path(current_user)              
               %li.divider
               %li= link_to "Log out", destroy_user_session_path, method: :delete
         - else

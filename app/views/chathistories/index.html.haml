@@ -1,0 +1,15 @@
+%h1 Chat History
+%table.table.display.responsive.no-wrap
+  %thead
+    %tr
+      %th Sender
+      %th Receiver
+      %th Chat Content
+      %th Chat Date
+  %tboyd
+    - @chathistories.each do |chat|
+      %tr
+        %td= chat.sender.email
+        %td= chat.receiver.email
+        %td= chat.chat_content
+        %td= chat.created_at.strftime("%Y-%m-%d")

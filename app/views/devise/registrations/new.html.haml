@@ -7,19 +7,7 @@
       .field
         = f.label :email
         %br/
-        = f.email_field :email, autofocus: true, class:'form-control'
-      .filed
-        = f.label :first_name
-        %br/
-        = f.text_field :first_name, class:'form-control'
-      .field
-        = f.label :last_name
-        %br/
-        = f.text_field :last_name, class:'form-control'
-      .field
-        = f.label :phone_number
-        %br/
-        =f.text_field :phone_number, class:'form-control'
+        = f.email_field :email, autofocus: true, class:'form-control'      
       .field
         = f.label :password
         - if @validatable
