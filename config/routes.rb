@@ -4,5 +4,8 @@ Rails.application.routes.draw do
   resources :chathistories, only: [:index]
   get 'home/about_us'
   get 'home/contact_us'
+
+  mount API => '/'
+  
   root 'home#index'
 end

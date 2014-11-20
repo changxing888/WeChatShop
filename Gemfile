@@ -22,6 +22,8 @@ gem 'devise'
 gem 'thin'
 gem 'binding_of_caller'
 
+gem 'grape'
+
 group :assets do
   # Use Uglifier as compressor for JavaScript assets
   gem 'uglifier', '>= 1.3.0'
