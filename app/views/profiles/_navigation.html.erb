@@ -1,0 +1,6 @@
+<ul class="menu_wrap nav nav-tabs text-center">
+	<li class=<%= "active" if params[:action] == "index" %>><%= link_to "Personal", profiles_path %></li>
+	<li class=<%= "active" if params[:action] == "education" %>><%= link_to "Education", education_profiles_path %></li>
+	<li class=<%= "active" if params[:action] == "experience" %>><%= link_to "Experience", experience_profiles_path %></li>
+	<li class=<%= "active" if params[:action] == "verification" %>><%= link_to "Contact", verification_profiles_path %></li>
+</ul>

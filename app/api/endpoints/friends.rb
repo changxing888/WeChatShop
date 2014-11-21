@@ -4,8 +4,10 @@ module Endpoints
     resource :friends do
 
       get :ping  do
-        {success: "wechatshop"}
+        {success: TimeChatNet::Application::USER_UNREGISTERED}
       end
+
+
 
       # Get Friend List
       # GET: /api/v1/friends

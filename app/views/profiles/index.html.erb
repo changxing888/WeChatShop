@@ -1,0 +1,146 @@
+<section id="first" class="team">
+	<a class="anchor" id="row1"></a>
+
+	<div class="wrapper bg-colored text-center">	
+		<div class="container">
+			<div class="row">
+				<div class="span12">
+					<%= render "layouts/header" %>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>	
+
+<section id="second" class="team">
+	<div class="wrapper">	
+		<div class="container blog">
+			<div class="row">
+				<!-- .span8 -->
+				<div class="span12">
+					<div class="row">
+						<div class="span12">
+							<%= render 'layouts/messages' %>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="request_fields_wrapper top_message">
+							<div class="row-fluid">
+								<div class="span8">
+									Profile Settings
+								</div>
+                <div class="span4 text-right">
+                  <%= link_to "View&nbsp;Profile".html_safe, public_profile_path(current_user.permalink), style:"color:white;", :class => "btn-info btn-submit btn", :target => "_blank"%>
+                </div>
+							</div>
+						</div>
+						
+						<%= render "profiles/navigation" %>
+
+
+
+
+
+						<div class="tuition_wrapper user_profile_form">
+							<div class="row-fluid">
+								<div class="span12">
+
+									<h3>Personal</h3>
+									<div class="row">
+										<div class="span9 offset1">
+
+
+											<%= simple_form_for(current_user, :url => profile_path(current_user), :html => { :method => :put, :class => 'get_lat_long_form form-horizontal form-vertical' }) do |f| %>
+											<%= f.input :avatar, :label => "Profile Photo" do %>
+
+											<div class="row-fluid" style="display: inline-block;">
+												<div class="fileupload fileupload-new" data-provides="fileupload">
+													<div class="fileupload-new thumbnail" style="width: 100px; height: 100px;">
+														<%= image_tag(current_user.avatar.thumb.url)%>
+													</div>
+													<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 100px; max-height: 100px; line-height: 20px;">
+
+													</div>
+													<div>
+														<span class="btn btn-info btn-file">
+															<span class="fileupload-new btn-file">Select image</span>
+															<span class="fileupload-exists btn-file">Change</span>
+															<input type="file" />
+															<%= f.file_field :avatar %>
+															<%= f.input :avatar_cache, :as => :hidden %>
+														</span>
+														<a href="#" class="btn btn-info fileupload-exists btn-file" data-dismiss="fileupload">Remove</a>
+													</div>
+												</div>
+												<div style="padding-top: 25px;color: #BEBEBE;">
+													<span>This photo will appear on your profile</span>
+												</div>
+											</div>
+											<% end %>
+
+											<%= f.input :dob, :label => "Date of Birth", :as => :string, :input_html => {:class => "datepicker"}%>
+											<%= f.input :sex, as: :select, include_blank: false,collection: User.sex_options , :selected => current_user.sex ? 1 : 0, :input_html => {:style => ""}, :label => "Gender"%> 
+											<%= f.input :qualification, :as => :select, collection: User.qualification_options, :prompt => "Select qualification", :label => "Highest Qualification"  %>
+											<%#= f.input :city, label: "City", placeholder: "Singapour", :input_html => { :id => "geo_city" } %>
+											<%= f.input :city_id, :as => :select, collection: City.all.collect{|c| [c.name, c.id]} , :input_html => { :class => 'mul_s', :id => "geo_city"}, :prompt => "Select city", :label => "City"  %>
+											<%= f.input :address, :label => "Street/Road name", placeholder: "e.g. 123 Main street", :input_html => { :id => "geo_address" } %>
+											<%= f.input :zip, label: "ZIP/Postal code", placeholder: "Eg. 123456", :input_html => { :id => "geo_zip" } %>
+											<%= f.input :permalink, :label => "Profile Page URL " do %>
+											<div class="row-fluid" style="display: inline-block;">
+												tutors.co/<%= f.input_field :permalink, :style => "width:138px;" %>
+											</div>
+											<% end %>
+
+											<%= f.input :arrangement do %>
+											<% User.arrangement_options.each do |loc| %>
+											<div class="row-fluid" style="display: inline-block;">
+												<label class="checkbox" style="padding-left: 30px;">
+													<%= check_box_tag "user[arrangement][]", loc.last, f.object.arrangement && f.object.arrangement.include?(loc.last) ? true : false, :id => "req_#{loc.last}" %>
+													<%= loc.first %>
+												</label>
+											</div>
+											<% end %>
+											<% end %>
+
+											<div class="willing_to_travel_display" style="<%= "display:none" unless f.object.arrangement.include?("i_travel") %>">
+												<%= f.input :willing_to_travel, :as => :select, collection: User.willing_to_travel_options, :prompt => "Select distance", :label => "Willing to Travel"  %>
+											</div>
+
+
+											<%= f.input :about, :class => "inline", :label => "Something about you<br/>(150-450 character)" do %>
+											<%= f.input_field :about, :rows => 5, :style => "width:80%", :placeholder => "This is your chance to tell your students about yourself."  %>
+											<% end %>
+
+											<%= f.input :philosopfy, :class => "inline", :label => "Teaching Philosopfy<br/>(160 character)" do %>
+											<%= f.input_field :philosopfy, :rows => 5 , :style => "width:80%", :placeholder => "Give a short summary of your teaching philosopfy." %>
+											<% end %>
+
+											<%= f.input :lat, :as => :hidden, :input_html => { :id => "geo_lat" } %>
+											<%= f.input :long, :as => :hidden, :input_html => { :id => "geo_long" } %>
+
+
+											<div class="row-fluid pad-t25">
+												<div class="span4 offset7 text-center" style="margin-right: 70px;">
+
+													<%= f.button :submit, 'Save changes', :class => 'btn-success btn-large btn-submit btn', :style => "float: none;margin-top: 10px;" %>
+												</div>
+											</div>
+
+
+
+											<% end %>
+										</div>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<!-- .span4 -->
+			</div>
+			<!-- .row -->
+		</div><!-- .blog -->
+	</div>
+</section>

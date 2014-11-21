@@ -1,0 +1,137 @@
+<section id="first" class="team">
+	<a class="anchor" id="row1"></a>
+
+	<div class="wrapper bg-colored text-center">	
+		<div class="container">
+			<div class="row">
+				<div class="span12">
+					<h3><%= render "layouts/header" %></h3>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>	
+
+<section id="second" class="team">
+	<div class="wrapper">	
+		<div class="container blog">
+			<div class="row">
+				<!-- .span8 -->
+				<div class="span12">
+					<div class="row">
+						<div class="span12">
+							<%= render 'layouts/messages' %>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="request_fields_wrapper top_message">
+							<div class="row-fluid">
+								<div class="span12">
+									Profile Settings
+								</div>
+							</div>
+						</div>
+						<%= render "profiles/navigation" %>
+						<div class="tuition_wrapper user_profile_form">
+							<div class="row-fluid">
+								<div class="span12">
+
+									<h3 style="padding-bottom:10px;">Experience</h3>
+									<% if current_user.experiences.empty? %>
+									<div class="text-center">
+										You don't have any experience added. Please add some bellow
+									</div>
+									<% else %>
+
+									<% current_user.experiences.each do |experience| %>
+
+									<div class="row-fluid public_profile"  style="margin-bottom:15px">
+										<span class="list_heading"><%= experience.name %> (<%= experience.start_year %> - <%= experience.end_year %>) <span style="font-size:13px;margin-left:5px;"><%= link_to "Remove", experience_path(experience), :method=>:delete %></span></span>
+										<span class="list_subheading"><%= experience.title %></span>
+										<span class="list_text"><%= experience.remarks %></span>
+									</div>
+
+									<% end %>
+									<% end %>
+
+
+                  <%if @experience.errors.empty? %>
+                    <%= link_to "Add Experience", "#", :class => "btn-info btn-large btn-submit btn", :style => "margin-top:10px;", :id => "add_new_exp_item_link" %>
+                  <%end%>
+                  <div id="add_new_exp_item" <%= @experience.errors.empty? ? "style=display:none" : "" %>>
+										<fieldset class="sponsored_block">
+											<legend><h3 style="padding:20px 0;">Add new Experience</h3></legend>
+											<div class="row">	
+
+												<div class="span6 offset3">
+													<div class="cover_letter" style="padding-left: 30px;padding-top: 20px;">
+														<%= simple_form_for(@experience, :html => { :method => :post, :class => 'form-vertical' }) do |f| %>
+														<div class="row-fluid">
+															<div class="span6">
+																<%= f.input :name, :label => "Place", :placeholder => "Institution name" %>
+															</div>
+															<div class="span6">
+																<%= f.input :start_year, :label => "Period" do %>
+																<div class="row-fluid" style="display: inline-block;">
+																	<%= f.select :start_year, (1920..2013).to_a.reverse, {}, :style => "margin-right: 10px;width:90px;" %>
+																	<span>to</span>
+																	<%= f.select :end_year, (1920..2013).to_a.reverse, {}, :style => "margin-left: 10px;width:90px;" %>
+																</div>
+
+																<% end %>
+															</div>
+														</div>
+
+
+														<div class="row-fluid">
+															<div class="span6">
+																<%= f.input :title, :label => "Title", :placeholder => "English teacher" %>
+															</div>
+															<div class="span6">
+
+															</div>
+														</div>
+														<%= f.input :remarks, :input_html => {:rows => 3, :style => "width:91%" }, :placeholder => "Remark on your achievements, specializations, and other relevant things here"  %>
+
+														<div class="row-fluid pad-t25">
+															<div class="span12 text-center">
+
+																<%= f.button :submit, 'Add Experience', :class => 'btn-success btn-large btn-submit btn', :style => "float:none;" %>
+															</div>
+														</div>
+
+
+
+														<% end %>
+													</div>
+												</div>
+											</div>
+										</fieldset>										
+										
+									</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<!-- .span4 -->
+			</div>
+			<!-- .row -->
+		</div><!-- .blog -->
+	</div>
+</section>

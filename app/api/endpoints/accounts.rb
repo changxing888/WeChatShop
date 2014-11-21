@@ -307,8 +307,6 @@ module Endpoints
           {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
         end
       end
-      
-    end
-
+    end # end accounts
   end
 end

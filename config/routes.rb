@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  get 'contacts/index'
+
+  get 'contacts/new'
+
+  get 'contacts/edit'
+
+  get 'contacts/show'
+
   devise_for :users
   resources :users, only: [:index, :destroy]
   resources :chathistories, only: [:index]

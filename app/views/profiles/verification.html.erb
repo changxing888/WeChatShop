@@ -1,0 +1,198 @@
+<section id="first" class="team">
+	<a class="anchor" id="row1"></a>
+
+	<div class="wrapper bg-colored text-center">	
+		<div class="container">
+			<div class="row">
+				<div class="span12">
+					<h3><%= render "layouts/header" %></h3>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>	
+
+<section id="second" class="team">
+	<div class="wrapper">	
+		<div class="container blog">
+			<div class="row">
+				<!-- .span8 -->
+				<div class="span12">
+					<div class="row">
+						<div class="span12">
+							<%= render 'layouts/messages' %>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="request_fields_wrapper top_message">
+							<div class="row-fluid">
+								<div class="span12">
+									Profile Settings
+								</div>
+							</div>
+						</div>
+						<%= render "profiles/navigation" %>
+						<div class="tuition_wrapper user_profile_form">
+							<div class="row-fluid">
+								<div class="span12">
+
+									<h3>Contact details</h3>
+
+									<% unless current_user.phone_verified %>
+									<%= simple_form_for(current_user, :html => { :method => :post, :class => 'form-horizontal' }) do |f| %>
+									<%= f.input :uid, :as => :hidden, :input_html => {:id => "verification_token", :value => current_user.uid}%>
+
+									<%= f.input :phone do %>
+									<div class="row-fluid">
+										<div class="span7">
+											<%= f.text_field :phone, :style => "width:100%;", :id => "verification_phone", :placeholder => "Phone number in international format (+63)"%>
+										</div>
+										<div class="span4 offset1">
+											<%= link_to "Send code".html_safe, send_phone_code_profiles_path, :class => "btn btn-input send_phone_verification_code", "data-resend" => "Resend code", :style => "margin-right:0px;"%>
+										</div>
+									</div>
+									<% end %>
+									<div class="row-fluid" id="phone_verification_2" style="display:none">
+										<%= f.input :phone_verification_code, :label => "Verification code" do %>
+										<div class="row-fluid">
+											<div class="span7">
+												<%= f.text_field :phone_verification_code, :value => "", :style => "width:100%;", :id => "verification_phone_code"%>
+											</div>
+											<div class="span4 offset1">
+												<%= link_to "Verify".html_safe, verify_phone_code_profiles_path, :class => "btn btn-input verify_phone_verification_code", "data-resend" => "Resend code", :style => "margin-right: 0px;" %>
+											</div>
+										</div>
+										<% end %>
+										<div class="clearfix"></div>
+										<div class="span12 text-center">
+											<%= link_to "Didn't get the code? Resend it!", send_phone_code_profiles_path, :class => "underline resend_phone_verification_code", "data-resend" => "Didn't get the code? Resend it!" %>
+										</div>
+										<div class"clearfix"></div>
+										<div class="span12 text-center">
+											<div class="request_fields_wrapper">
+												<p class="address_error verify_error">The verification code does not match! Please try it again.</p>
+											</div>
+										</div>
+										<div class="clearfix"></div>
+									</div>
+									<% end %>
+									<% end %>
+
+									<%= simple_form_for(current_user, :html => { :method => :post, :class => 'form-horizontal' }) do |f| %>
+									<%= f.input :uid, :as => :hidden, :input_html => {:id => "verification_token", :value => current_user.uid}%>
+									<div class="phone_verified" style="<%= "display:none" unless current_user.phone_verified %>">
+										<%= f.input :phone do %>
+										<div class="row-fluid">
+											<div class="span7">
+												<%= f.text_field :phone, :style => "width:100%;", :id => "verified_phone", :disabled => "disabled", :value => current_user.phone %>
+											</div>
+											<div class="span4 offset1 text-center" style="margin-top: 5px;">
+												<span>Phone verified</span>
+												<span style="font-size: 14px;">(<%= link_to "Change phone", unlink_profiles_path(:type => :phone)%>)</span>
+											</div>
+										</div>
+										<% end %>
+									</div>
+									<% end %>
+
+									<%= simple_form_for(current_user, :html => { :method => :post, :class => 'form-horizontal' }) do |f| %>
+									<%= f.input :email do %>
+									<div class="row-fluid">
+										<div class="span7">
+											<%= f.text_field :email, :style => "width:100%;", :id => "verified_phone", :disabled => "disabled", :value => current_user.email %>
+										</div>
+										<div class="span4 offset1 text-center" style="margin-top: 5px;">
+											<span style="">Email verified</span>
+										</div>
+									</div>
+									<% end %>
+									<% end %>
+
+									<%= simple_form_for(current_user, :html => { :method => :post, :class => 'form-horizontal' }) do |f| %>
+									<%= f.input :fb_uid, :label => "Facebook" do %>
+									<div class="row-fluid">
+										<div class="span7">
+											<% if current_user.fb_uid%>
+											<span class="btn btn-facebook btn-large btn-full no_padding_margin_left_right"><i style='padding-right:5px;' class='icon-facebook'></i> Connect with Facebook</span>
+											<% else %>
+											<%= link_to "<i style='padding-right:5px;' class='icon-facebook'></i> Connect with Facebook".html_safe, user_omniauth_authorize_path(:facebook), :class => "btn btn-facebook btn-large btn-full no_padding_margin_left_right"%>
+											<% end %>
+										</div>
+										<div class="span4 offset1 text-center" style="margin-top: 10px;">
+											<% if current_user.fb_uid %>
+											<span style="">Facebook verified</span>
+											<span style="font-size: 14px;">(<%= link_to "Unlink", unlink_profiles_path(:type => :facebook)%>)</span>
+											<% end %>
+										</div>
+									</div>
+									<% end %>
+
+									<%= f.input :twitter_uid, :label => "Twitter" do %>
+									<div class="row-fluid">
+										<div class="span7">
+											<% if current_user.twitter_uid%>
+											<span class="btn btn-twitter btn-large btn-full no_padding_margin_left_right"><i class='icon-twitter'></i> Connect with Twitter</span>
+											<% else %>
+											<%= link_to "<i class='icon-twitter'></i> Connect with Twitter".html_safe, user_omniauth_authorize_path(:twitter), :class => "btn btn-twitter btn-large btn-full no_padding_margin_left_right"%>
+											<% end %>
+										</div>
+										<div class="span4 offset1 text-center" style="margin-top: 10px;">
+											<% if current_user.twitter_uid %>
+											<span style="">Twitter verified</span>
+											<span style="font-size: 14px;">(<%= link_to "Unlink", unlink_profiles_path(:type => :twitter)%>)</span>
+											<% end %>
+										</div>
+									</div>
+									<% end %>
+
+									<%= f.input :linkedin_uid, :label => "LinkedIn" do %>
+									<div class="row-fluid">
+										<div class="span7">
+											<% if current_user.linkedin_uid%>
+											<span class="btn btn-linkedin btn-large btn-full no_padding_margin_left_right"><i class='icon-linkedin'></i> Connect with LinkedIn</span>
+											<% else %>
+											<%= link_to "<i class='icon-linkedin'></i> Connect with LinkedIn".html_safe, user_omniauth_authorize_path(:linkedin), :class => "btn btn-linkedin btn-large btn-full no_padding_margin_left_right"%>
+											<% end %>
+										</div>
+										<div class="span4 offset1 text-center" style="margin-top: 10px;">
+											<% if current_user.linkedin_uid %>
+											<span style="">LinkedIn verified</span>
+											<span style="font-size: 14px;">(<%= link_to "Unlink", unlink_profiles_path(:type => :linkedin)%>)</span>
+											<% end %>
+										</div>
+									</div>
+									<% end %>
+
+									<%= f.input :gplus_uid, :label => "Google" do %>
+									<div class="row-fluid">
+										<div class="span7">
+											<% if current_user.gplus_uid %>
+											<span class="btn btn-google-plus btn-large btn-full no_padding_margin_left_right"><i class='icon-google-plus'></i> Connect with Google</span>
+											<% else %>
+											<%= link_to "<i class='icon-google-plus'></i> Connect with Google".html_safe, user_omniauth_authorize_path(:google_oauth2), :class => "btn btn-google-plus btn-large btn-full no_padding_margin_left_right"%>
+											<% end %>
+										</div>
+										<div class="span4 offset1 text-center" style="margin-top: 10px;">
+											<% if current_user.gplus_uid %>
+											<span style="">Google verified</span>
+											<span style="font-size: 14px;">(<%= link_to "Unlink", unlink_profiles_path(:type => :google)%>)</span>
+											<% end %>
+										</div>
+									</div>
+									<% end %>
+
+									<% end %>
+
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<!-- .span4 -->
+			</div>
+			<!-- .row -->
+		</div><!-- .blog -->
+	</div>
+</section>
