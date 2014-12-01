@@ -1,19 +1,16 @@
 Rails.application.routes.draw do
-  get 'contacts/index'
-
-  get 'contacts/new'
-
-  get 'contacts/edit'
-
-  get 'contacts/show'
-
+  mount API => '/'
   devise_for :users
+
+  resources :products
+  resources :orders
+  resources :contacts, only: [:index, :new, :edit, :show]  
+  
   resources :users, only: [:index, :destroy]
   resources :chathistories, only: [:index]
+
   get 'home/about_us'
   get 'home/contact_us'
-
-  mount API => '/'
   
   root 'home#index'
 end

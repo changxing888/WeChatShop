@@ -33,7 +33,8 @@ group :assets do
   gem 'sass-rails', '~> 4.0.3'
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   gem 'therubyracer',  platforms: :ruby
-  # gem 'rails-assets-bootstrap'
+  
+  gem 'twitter-bootstrap-rails', :git => 'https://github.com/seyhunak/twitter-bootstrap-rails.git', :branch => 'master'
 end
 
 group :development do

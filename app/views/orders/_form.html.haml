@@ -1,0 +1,42 @@
+= form_for @order, html: { class: "form form-horizontal order" } do |f|
+  .form-group
+    = f.label :name, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :name, class: 'form-control', required: true
+    / = f.error_span(:name)
+  .form-group
+    = f.label :number, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :number, class: 'form-control', required: true
+    / = f.error_span(:number)
+  .form-group
+    = f.label :count, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :count, class: 'form-control', required: true
+    / = f.error_span(:count)
+  .form-group
+    = f.label :user_id, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :user_id, class: 'form-control', required: true
+    / = f.error_span(:user_id)
+  .form-group
+    = f.label :status, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :status, class: 'form-control', required: true
+    / = f.error_span(:status)
+  .form-group
+    = f.label :position, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :position, class: 'form-control', required: true
+    / = f.error_span(:position)
+  .form-group
+    = f.label :date, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :date, class: 'form-control', required: true
+    / = f.error_span(:date)
+  .form-group
+  .col-lg-offset-2.col-lg-10
+    .col-md-3.col-md-offset-3
+      = f.submit nil,class: 'btn btn-primary'
+    .col-md-3
+      = link_to t('.cancel', :default => t("helpers.links.cancel")), orders_path, :class => 'btn btn-default'
