@@ -1,0 +1,11 @@
+.container{style:'padding-left: 20px; padding-top: 20px;'}
+  .row
+    .span9
+      %h3 Activity Categories
+    .span3{style: 'padding-top: 20px;'}
+      = link_to "Import New Activity Category", "javascript://", class: "btn btn-success", id: "import_new_activity_category"
+  .row    
+    .span4.categories-tree      
+      = render :partial=>'category_list'
+    .span8.set-categories
+      #selected_category

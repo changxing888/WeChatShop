@@ -1,0 +1,86 @@
+.container
+  .row
+    .span4{style:'margin-left:0px;'}
+      %h3 User's Search
+    .span4.pull-right
+      = text_field_tag 'search', params[:search_id], :class=>'span3 search-query', style:'padding-left:10px;padding-right:5px;'
+      %span.fornav-end
+        %i.icon-remove-sign{:onclick=>'javascript:$("#search").val(""); $("#admin_report_form").submit()',style:'margin-left: -21px;margin-top: 8px;position: absolute;cursor:pointer;'}
+
+  .row
+    .row{style:'margin-bottom:10px;'}
+      = form_tag(admin_reports_index_path, id: 'admin_report_form', method: :get, class:'form-search') do
+        = hidden_field_tag :user_id
+        = hidden_field_tag :search_id
+        .span2
+          = select_tag :location, options_for_select(Location.activity_locations.collect{|location| [location.name, location.id]}, params[:location]), style: 'width: 100%;', prompt: "-- Select Location --"
+        .span2
+          = select_tag :type, options_for_select(Report::TYPE_OF_SEARCH.collect{|t| [t, Report::TYPE_OF_SEARCH.index(t)]}, params[:type]), style: 'width: 100%;', prompt: "-- Select Type --"
+        .span2
+          %label.span2{style:'text-align: right; margin-left: 25px; margin-top: 5px;'} By Date: Start
+        .span2
+          = text_field_tag :start_date, params[:start_date], class: 'span2'
+        .span2
+          = text_field_tag :end_date, params[:end_date], class: 'span2'
+        .span2
+          = submit_tag "Search Reports", class: "btn btn-primary"      
+        
+    
+  .row
+    %table.table.table-hover.table-condensed.table-bordered.table-striped
+      %thead
+        %tr
+          %th{style:'width: 10%'} User Name
+          %th{style:'width: 10%'} Date/Time of Search
+          %th{style:'width: 20%'} Location
+          %th{style:'width: 5%'} Location Type
+          %th{style:'width: 15%'} Lat/Lang/Radius
+          %th{style:'width: 10%'} Interests
+          %th{style:'width: 5%'} Date Type
+          %th{style:'width: 5%'} Day
+          %th{style:'width: 5%'} Time
+          %th{style:'width: 5%'} Type of Search
+          %th{style:'width: 5%'} Action
+      %tbody
+        - @reports.each do |report|
+          %tr
+            %td= report.user.email
+            %td= report.created_at.strftime("%m/%d/%Y %l:%M:%S %P")
+            %td= report.location
+            %td= report.location_type
+            %td= report.geolocation
+            %td= report.interests_str
+            %td= report.datetype
+            %td= report.day
+            %td= report.time
+            %td= report.type_of_search
+            
+            %td
+              = link_to(admin_show_report_path(report), class: 'btn btn-mini', :"data-no-turbolink"=>true) do
+                %i.icon-pencil
+      %tfoot
+        %tr
+          %td.digg_pagination{colspan:10}
+            = will_paginate @reports, previous_label: '< PREV', next_label: 'NEXT >' if @reports.present?
+
+:javascript
+  var users = #{@users};
+  $("#search").autocomplete({
+    dataType: "json",
+    source: users,
+    minLength: 2,
+    select: function(event, ui){
+      $("#user_id").val(ui.item.id);
+      $("#search_id").val(ui.item.value);
+      $("#admin_report_form").submit();
+    }
+  });
+
+  
+  $("#start_date").datepicker({
+    format: "mm/dd/yyyy"
+  });
+
+  $("#end_date").datepicker({
+    format: "mm/dd/yyyy"
+  });

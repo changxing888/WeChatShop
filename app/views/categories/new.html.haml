@@ -1,0 +1,72 @@
+.container{style:'padding-left: 20px; padding-top: 20px;'}
+  .row
+    .span9
+      %h3 New Activity Categories
+    .span3{style: 'padding-top: 20px;'}
+      = link_to "Close", admin_import_categories_path+"?cat_id=#{params[:cat_id]}", class: "btn btn-success", style: 'width: 150px;'
+
+  .row    
+    .span4.categories-tree
+      = render :partial=>'category_list'
+    .span8.set-categories
+      .row
+        = render :partial=>'yelp_category_list'                      
+      = simple_form_for @category, :url=>admin_activities_categories_create_path, :html=>{:class=>'form-inline', :multipart=>true, :"data-validate" => "parsley"} do |f|
+        %h3 
+          Parent Category:
+          = @parent_cat.display_name if @parent_cat.present?
+        = hidden_field_tag :parent_cat_id, @parent_cat.nil? ? "root" : @parent_cat.id
+        .row
+          .span4
+            = f.input :display_name, input_html: {:"data-required"=>"true", :"data-error-message"=>"Please input name"}
+            = f.input :app_publish_name, input_html: {:"data-required"=>"true", :"data-error-message"=>"Please input app_publish_name"}            
+          .span4
+            %label Image(s):
+            %br/
+            = f.file_field :image
+        .row.form-horizontal
+          .span4
+            = f.input :active, as: :boolean, class: 'pull-left'
+            = f.input :show_under_top, as: :boolean, class: 'pull-left', label: "Show under top Category"
+          .span4
+            = text_field_tag :order_id, 0, name:"category[order_id]", style: 'width: 74px;'
+            %label Order Number
+        .row
+          .span4
+            = f.input :object_type, :collection=>Category::OBJECT_TYPE, input_html: {:"data-required"=>"true", :"data-error-message"=>"Please object type"}, prompt: '-- Select --'
+          .span4
+            = f.input :date_type, :collection => DateType.all, prompt: '-- Select --'
+        .row
+          .span4
+            %label Available in locations:
+          
+        .row
+          .span8
+            = f.input :description, as: :text, :input_html=>{:class=>"span8"}
+        .row
+          .span4
+            = f.input :parts_of_day, :collection => PartsOfDay.all, prompt: '-- Select --'
+          .span4
+            = f.input :timeframe, :collection => Timeframe.all, prompt: '-- Select --'
+        .row
+          .span4
+            = f.input :yelp_name
+          .span4
+            = f.input :yelp_category_id, :label=>"Yelp Category Id", input_html: {:"data-required"=>"true", :"data-error-message"=>"Please select category to import"}
+        .row.last-row
+          = f.submit "Import New Category", class: 'btn btn-success offset6'
+
+:css
+  .parsley-error-list{margin-left: 0px;}
+  .parsley-error-list .custom-error-message{background-color: #FFC0CB;border-radius: 4px 4px 4px 4px;display: list-item;list-style: none outside none;padding-left: 10px;}
+
+:javascript
+  var yelp_id = "#{@parent_cat.present? ? @parent_cat.yelp_category_id : 'active'}"
+  $("#yel_categories tbody tr").each(function(index){
+    if($(this).find('td').eq(1).text() == yelp_id){
+      $("#yel_categories td").removeClass("selected_row");
+      $(this).find('td').addClass("selected_row");
+      height = index * 28
+      $("#table_scroll").animate({scrollTop:height}, 1200)
+    }
+  });

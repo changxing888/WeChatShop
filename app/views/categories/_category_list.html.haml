@@ -1,0 +1,159 @@
+:css
+  #category_tree_list li .selected_cat{background-color: pink;}
+.input-append{style:'width:80%'}
+  = text_field_tag(:activity_category, params[:search], :placeholder=> 'Search category...', class: "activity_category", style:'width:80%;')
+  = hidden_field_tag :cat_id
+  %button#cat_search_button.btn.add-on{style: 'height: inherit !important;'}
+    %i.icon-search
+.well{style:' margin-right: 15%;max-height: 600px; overflow-y: scroll;'}
+  %div
+    %ul#category_tree_list.nav.nav-list
+      - @root_categories.each do |root_cat|
+        %li
+          - if root_cat.has_child?
+            %a.parent-cat-item.tree-toggle.nav-header{href: "javascript://", :"data-id"=>root_cat.id, :id=>"cat_#{root_cat.id}"}= root_cat.display_name
+            %ul.nav.nav-list.tree.child-list{:id=>"tree_#{root_cat.id}", style: 'display: none;'}
+              - root_cat.sub_categories_without_active.each do |sub_cat|
+                %li
+                  - if sub_cat.has_child?
+                    %a.parent-cat-item.tree-toggle.nav-header{href: "javascript://", :"data-id"=>sub_cat.id, :id=>"cat_#{sub_cat.id}"}= sub_cat.display_name
+                    %ul.nav.nav-list.tree.sub-child-list{:id=>"tree_#{sub_cat.id}", style: 'display: none;'}
+                      - sub_cat.sub_categories_without_active.each do |sub_cat_sub_cat|
+                        %li
+                          - if sub_cat_sub_cat.has_child?
+                            %a.parent-cat-item.tree-toggle.nav-header{href: "javascript://", :"data-id"=>sub_cat_sub_cat.id, :id=>"cat_#{sub_cat_sub_cat.id}"}= sub_cat_sub_cat.display_name
+                            %ul.nav.nav-list.tree{:id=>"tree_#{sub_cat_sub_cat.id}", style: 'display: none;'}
+                              - sub_cat_sub_cat.sub_categories_without_active.each do |child_item|
+                                %li
+                                  %a.sub-cat-item{href: "javascript://", :"data-id"=>child_item.id, :id=>"cat_#{child_item.id}"}= child_item.display_name               
+                          - else
+                            %a.sub-cat-item{href: "javascript://", :"data-id"=>sub_cat_sub_cat.id, :id=>"cat_#{sub_cat_sub_cat.id}"}= sub_cat_sub_cat.display_name
+                      /%li
+                      /  %a.add-new-item{href: "javascript://", :"data-id"=>sub_cat.id} Add New Category 
+                  - else
+                    %a.sub-cat-item{href: "javascript://", :"data-id"=>sub_cat.id, :id=>"cat_#{sub_cat.id}"}= sub_cat.display_name
+              /%li
+              /  %a.add-new-item{href: "javascript://", :"data-id"=>root_cat.id} Add New Category  
+          - else
+            %a.sub-cat-item{href: "javascript://", :"data-id"=>root_cat.id, :id=>"cat_#{root_cat.id}"}= root_cat.display_name
+        /%li.divider{style:'margin: 0 1px;'}
+      %li
+        %a.add-new-item{href: "/admin/activities/categories/new?cat_id=root", :"data-id"=>''} Add New Root Category
+
+:javascript
+  var action = "#{params[:action]}"
+  $(".tree-toggle").click(function(){
+    $(this).parent().children('ul.tree').toggle(200);
+  })
+  $("#activity_category").keydown(function(e){
+    if(e.which == 13){
+      e.preventDefault();
+      $("#cat_search_button").click();    
+    }
+  });
+  $("#cat_search_button").click(function(){
+    qry = $("#cat_id").val();
+    var url_ajax = '/admin/activities/categories/search/'+qry;
+    $.get(url_ajax).done(function(data){
+      if(data.length > 1){
+        view_category(data)
+      }      
+    });    
+    return false;    
+  })
+
+  view_category("#{@category.id}")
+  view_category("#{@parent_cat.nil? ? " " : @parent_cat.id}")
+  
+  $("#category_tree_list li a").click(function(e){
+    var id = $(this).data("id")
+    if(action=="edit"){
+      $("#parent_id").val(id);
+      $("#parent_category_label").text("Parent Category : " + $(this).text());      
+    }else if(action=="index"){
+      view_category(id)
+    }
+    
+  }); 
+  function view_category(id){
+    if(id == " ") return false;
+    
+    $("#selected_category").html('<div id="loading" class="offset1" style="margin-top:150px;"><img src="/assets/sgo-loading-9129cbf8345ccf0535b88e2081d363cd.gif" alt="Loading"></div>');
+    
+    $("#tree_"+id).show();
+    $("#category_tree_list li a").removeClass("selected_cat")
+    var item = $("#cat_"+id);
+    item.addClass("selected_cat")
+    var parent=item.parent();
+    var i = 0    
+    while(i < 5){
+      parent = parent.parent();
+      parent.show();
+      i++;
+    }
+    var url_ajax = '/admin/activities/categories/show/'+id;
+    $.get(url_ajax).done(function(data){
+      $("#import_new_activity_category").attr("href","/admin/activities/categories/new?cat_id="+id);      
+      $("#selected_category").html(data);
+    });    
+    return false;
+  }
+
+  var categories = #{@categories};
+  $("#activity_category").autocomplete({
+    dataType: "json",
+    source: categories,
+    minLength: 2,
+    select: function(event, ui){
+      $("#cat_id").val(ui.item.id);
+    }
+  })
+
+  old_id = 0
+  cur_id = 0
+
+  $("#category_tree_list").sortable({
+    revert: true,
+    start: function(event, ui){
+      old_id = ui.item.index();
+    },
+    stop: function(event, ui){
+      id = ui.item.find('a').data("id");
+      cur_id = ui.item.index();      
+      url = "/admin/categories/change_order_id";
+      $.post(url,{id:id,old_id:old_id,cur_id:cur_id}).done(function(dt){
+        console.log(dt)
+      })      
+    }
+  });
+
+
+  $(".child-list").sortable({
+    revert: true,
+    start: function(event, ui){
+      old_id = ui.item.index();
+    },
+    stop: function(event, ui){
+      id = ui.item.find('a').data("id");
+      cur_id = ui.item.index();      
+      url = "/admin/categories/change_order_id";
+      $.post(url,{id:id,old_id:old_id,cur_id:cur_id}).done(function(dt){
+        console.log(dt)
+      })      
+    }
+  });
+
+  $(".sub-child-list").sortable({
+    revert: true,
+    start: function(event, ui){
+      old_id = ui.item.index();
+    },
+    stop: function(event, ui){
+      id = ui.item.find('a').data("id");
+      cur_id = ui.item.index();      
+      url = "/admin/categories/change_order_id";
+      $.post(url,{id:id,old_id:old_id,cur_id:cur_id}).done(function(dt){
+        console.log(dt)
+      })      
+    }
+  });

@@ -1,0 +1,4 @@
+- headers = ["Location", "State", "Activities(all)", "Activities(active)", "Merchants(all)", "Merchants(active)", "SuggestedDates(all)", "SuggestedDates(active)"]
+= CSV.generate_line headers
+- @search_results.each do |result|
+  = CSV.generate_line(result).html_safe.strip

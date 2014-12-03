@@ -1,0 +1,84 @@
+= javascript_include_tag("//maps.google.com/maps/api/js?v=3.13&sensor=false&libraries=geometry")
+= javascript_include_tag("//google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.0.14/src/markerclusterer_packed.js")    
+.container
+  %br/
+  .row
+    .span2
+      %h3 Activities
+    .span3.pull-right
+      
+  .row{style:'margin-left:0px;'}
+    = form_tag(admin_show_report_path, id: 'admin_import_activity', method: :get, class:'form-search') do
+      .span2{style:'margin-left:0px;'}
+        = text_field_tag :location, params[:location], :placeholder=>"input location", style: "width: 100%;"
+      .span2
+        = text_field_tag :mile, params[:mile], :placeholder=>"input mile", style: "width: 100%;"
+      .span2
+        = button_tag "Go", data:{:disable_with => "Please wait..."}, class:'btn btn-primary', style:'width:100px;'
+  - if @report.present?
+    .row{style:'margin-left:0px;'}
+      .span2{style:'margin-left:0px;'}
+        %h5
+          UserName: #{@report.user.email}
+      .span2
+        %h5
+          Coordinates: #{@loc_data.join(", ")}
+      .span2
+        %h5
+          Location Type: #{@report.location_type}
+      .span2
+        %h5
+          Date Type: #{@report.datetype}
+      .span2
+        %h5
+          Timeframes: #{@report.time}
+      .span2
+        %h5
+          Search Type: #{@report.type_of_search}
+    .row{style:'margin-left:0px;'}
+      .span2{style:'margin-left:0px;'}
+        %h5
+          Interests: #{@report.interests_str}
+      .span2
+        %h5
+          Location: #{@report.location}
+      .span2
+        %h5
+          Day: #{@report.day}
+    
+  .row.map-row{style:'margin-left: 0px;'}
+    %br/
+    .span6{style:'margin-left: 0px;max-height:600px;overflow:scroll;'}
+      %table.table.table-hover.table-condensed.table-bordered.table-striped
+        %thead
+          %tr
+            %th{style:'width: 5%'} No
+            %th{style:'width: 10%'} Merchant Name(s)
+            %th{style:'width: 10%'} Activity Name(s)
+            %th{style:'width: 40%'} Activity(s) Category
+            %th{style:'width: 15%'} City, State
+            %th{style:'width: 10%'} Miles to dest            
+        %tbody
+          - @loc_acts.each_with_index do |act,index|
+            %tr
+              %td{style:'text-align: center;vertical-align: bottom;'}= index + 1
+              %td{style:'text-align: center;vertical-align: bottom;'}= act.merchant.name
+              %td{style:'text-align: center;vertical-align: bottom;'}= act.name
+              %td{style:'text-align: center;vertical-align: bottom;'}= act.categories_str
+              %td{style:'text-align: center;vertical-align: bottom;'}= act.full_city
+              %td{style:'text-align: center;vertical-align: bottom;'}=act.merchant.geo_location.distance_from(@loc_data).round(2)
+
+    .span6
+      #google_map.span6{style:'height: 600px;margin-left:0px;'}
+          
+
+:javascript  
+  
+  handler = Gmaps.build('Google');
+  handler.buildMap({ provider: {maxZoom:20 }, internal: {id: 'google_map'}}, function(){
+    var circles = handler.addCircles([{lat:#{@loc_data[0]}, lng:#{@loc_data[1]}, radius:#{@near_by.to_i*1000*1.6}}],{strokeColor:'#ff0000'});
+    markers = handler.addMarkers(#{@map_data.to_json});
+    handler.bounds.extendWith(markers);
+    handler.bounds.extendWith(circles);
+    handler.fitMapToBounds();
+  });

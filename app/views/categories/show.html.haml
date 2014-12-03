@@ -1,0 +1,58 @@
+.row
+  .span4
+    .row
+      %strong Display Name:
+      %p= @cat.display_name
+      %br/
+      %strong App publish name:
+      %p= @cat.app_publish_name
+    .row
+      %br/
+      %strong Active:
+      %p= @cat.active
+    .row
+      %br/
+      %strong Show under top Category:
+      %p= @cat.show_under_top    
+    .row
+      %br/
+      %strong Order Number:
+      = @cat.order_id
+    %br/
+  .span4
+    %strong Image(s):
+    %br/
+    = x_image_tag @cat.logo_img_url
+
+
+.row
+  .span4
+    %strong Object Type:
+    %p= @cat.object_type
+  .span4
+    %strong Date Type:
+    %p= @cat.date_type_name
+.row
+  %strong Available in locations:
+  .span4
+.row
+  .span8
+    %strong Description:
+    %p= @cat.description    
+.row
+  .span4
+    %strong Parts Of Day:
+    %p= @cat.parts_of_day_name    
+  .span4
+    %strong Timeframe:
+    %p= @cat.timeframe_name  
+.row
+  .span4
+    %strong Yelp Name:
+    %p= @cat.yelp_name
+  .span4
+    %strong Yelp Category ID:
+    %p= @cat.yelp_category_id    
+.row.last-row{style:'margin-top:20px;'}
+= link_to 'Delete Activity Category', admin_delete_category_path(@cat), :method => :delete, :data => { :confirm=>"Are you sure?" }, class: "btn btn-danger offset3"
+= link_to 'Edit Activity Category', admin_edit_category_path(@cat), class: "btn btn-success offset0"

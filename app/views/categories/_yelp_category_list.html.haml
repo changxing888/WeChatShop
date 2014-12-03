@@ -1,0 +1,51 @@
+:css
+  .selected_row{background-color: red !important}
+
+%label Select Category to Import:
+#table_wrapper
+  #table_scroll
+    %table#yel_categories.table-hover.table-condensed.table-bordered.table-striped
+      %thead
+        %tr
+          %th{style:'width:60%'}
+            %span.text{style:'border-radius: 3px 0 0 0;width: 59%;'} Yelp Category Name
+          %th{style:'width:20%'}
+            %span.text{style:'left: 58.4%;margin-left: 2px;width:20%;'} Yelp Category ID
+          %th{style:'width:20%'}
+            %span.text{style:'left: 78%;margin-left: 3px;width: 21%;border: 1px solid #EAEAEA;'}
+
+      %tbody
+        - @res.each do |y_cat|
+          %tr.success
+            %td= y_cat["title"]
+            %td= y_cat["alias"]
+            %td
+          - y_cat["category"].each do |y_s_cat|
+            %tr.info
+              %td= "#{y_cat['title']} -> #{y_s_cat['title']}"
+              %td= y_s_cat["alias"]
+              %td
+            - y_s_cat["category"].each do |y_e_cat|
+              %tr.error
+                %td= "#{y_cat['title']} -> #{y_s_cat['title']} -> #{y_e_cat['title']}"
+                %td= y_e_cat["alias"]
+                %td
+
+:javascript
+  $("#yel_categories tbody tr").each(function(e){
+    $(this).click(function(){
+      $("#yel_categories td").removeClass("selected_row");
+      $(this).find('td').addClass("selected_row");
+      yelp_title = $(this).find('td').eq(0).text();
+      yelp_id = $(this).find('td').eq(1).text();      
+      n = yelp_title.lastIndexOf("->")
+      if(n > 0){
+        title = yelp_title.substr(n+3, yelp_title.length)
+      }else{
+        title = yelp_title
+      }      
+      console.log(title)
+      $("#category_yelp_name").val(title);
+      $("#category_yelp_category_id").val(yelp_id);
+    });    
+  });

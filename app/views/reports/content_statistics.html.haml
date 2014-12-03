@@ -1,0 +1,142 @@
+.container.content-statistics
+  %h3 Content Statistics
+  .row.filter-options
+    .span6{style:'margin-left: 0px;'}
+      .span1{style:'margin-left: 0px;'}
+        %label Filters:
+      .span2{style:'margin-left: 25px;'}
+        = country_select :country_code, nil, {priority: %w(US CA), prompt: 'Please select a country', style:'width: 100%;'}
+      .span2{style:'margin-left: 10px;'}
+        = render partial: 'subregion_select'
+    .span6
+      .span2{style:'margin-left: 10px;'}
+        %label{style:'text-align: right;'} Date Range: Start
+      .span2{style:'margin-left: 10px;'}
+        = text_field_tag :start_date, "10/15/2013", :"data-behaviour"=>'datepicker', style:'width: 90%;'
+      .span2{style:'margin-left: 10px;'}
+        = text_field_tag :end_date, Time.now.to_date.strftime("%m/%d/%Y"), :"data-behaviour"=>'datepicker', style:'width: 90%;'
+  .row
+    .span3{style:'margin-left: 0px;'}
+      .input-append
+        %input#search_location.span2{:type => "text", style:'width: 100%;', placeholder: 'Add Location To List'}/
+        %button#add_location_button.btn{:type => "button"} Go!
+  .row.location-list
+    / .span2.location-item
+    /   %label
+    /     Santa Monica
+    /   = link_to "x", "javascript://",class:'location-close', data:{ct:'US',st:'CA',cy:'Monica'}
+    .span1.pull-right
+      = button_tag "Search", class: "btn btn-primary", id: "search_location_button"
+
+  .row.search-results{style:'margin-top: 30px;'}
+    .span4{style:'margin-left:0px;'}
+      %label{style:'font-size: 16px;font-weight: 600;text-align: center;'} Activities
+      .row{style:'padding-left:50px;padding-right:50px;'}
+        %label#all_acts_count{style:'background-color: rgb(147, 197, 237);font-size: 20px;height: 40px;padding-top: 20px;text-align: center;'} 0
+    .span4
+      %label{style:'font-size: 16px;font-weight: 600;text-align: center;'} Merchants
+      .row{style:'padding-left:50px;padding-right:50px;'}
+        %label#all_merchants_count{style:'background-color: rgb(147, 197, 237);font-size: 20px;height: 40px;padding-top: 20px;text-align: center;'} 0
+    .span4
+      %label{style:'font-size: 16px;font-weight: 600;text-align: center;'} Dates
+      .row{style:'padding-left:50px;padding-right:50px;'}
+        %label#all_dates_count{style:'background-color: rgb(147, 197, 237);font-size: 20px;height: 40px;padding-top: 20px;text-align: center;'} 0
+  .row.search-results-table
+    %table#search_results_list.table.table-hover.table-condensed.table-bordered.table-striped
+      %thead
+        %tr
+          %th{style:'width:20%'} City/Location
+          %th{style:'width:5%'} State
+          %th{style:'width:10%'} Activities(all)
+          %th{style:'width:10%'} Activities(active)
+          %th{style:'width:10%'} Merchants(all)
+          %th{style:'width:10%'} Merchants(active)
+          %th{style:'width:15%'} Suggested Dates(all)
+          %th{style:'width:15%'} Suggested Dates(active)
+      %tbody#search_result_list          
+  .row.last-row
+    = link_to "Export to Excel", admin_reports_export_path(format: "csv"), class: 'btn btn-default pull-right', :"data-no-turbolink"=>true
+  .row
+:javascript
+  loc_array = new Array();  
+  $('[data-behaviour~=datepicker]').datepicker({
+    format: "mm/dd/yyyy"
+  });
+
+  var state = ''
+
+  $('body').on('change', '#order_state_code', function() {
+    state = $(this).val();
+  })
+
+
+  $("#add_location_button").click(function(){
+    country = $("#country_code_").val();
+    state   = state;
+    city    = $("#search_location").val();
+
+    loc=[country, state, city].join(",");
+    index = loc_array.indexOf(loc);
+    
+    if(index < 0){
+      loc_array.push(loc);
+      $(".location-list").append("<div class='span2 location-item'><label>"+city+"</label><a href='javascript://' data-st='"+state+"' data-cy='"+city+"' data-ct='"+country+"' class='location-close'>x</a></div>");      
+    }else{
+      alert("This location already has been addedn");
+    }    
+
+  });
+
+    
+  $('body').on('click', '.location-close', function() {
+    $(this).parent().remove();
+    country = $(this).data("ct");
+    state   = $(this).data("st");
+    city    = $(this).data("cy");
+    loc=[country, state, city].join(",");    
+    index = loc_array.indexOf(loc);
+    loc_array.splice(index,1);
+  });
+
+  $("#search_location_button").click(function(){    
+    loc_data = loc_array.join("&&")
+    st_date = $("#start_date").val();
+    ed_date = $("#end_date").val();
+    
+    country = $("#country_code_").val();
+    state   = state;
+    city    = $("#search_location").val();
+
+    $("#search_location_button").removeClass("btn-primary").addClass("btn-danger").attr('disabled','disabled');
+    $("#search_location_button").text("Wait...");
+    url     = "#{admin_reports_search_content_path}"
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: { loc_data:loc_data, st_date:st_date, ed_date:ed_date, country:country, state:state }
+    }).done(function( data ) {
+      console.log(data);
+      $("#search_result_list").html('');
+      $("#search_result_list").html(data);
+      var acts_count = 0
+      var merchants_count = 0
+      var dates_count = 0
+      $("#search_result_list tr").each(function(){
+        act = parseInt($(this).find("td:eq(3)").text());
+        acts_count += act
+        
+        merchant = parseInt($(this).find("td:eq(5)").text());
+        merchants_count += merchant
+
+        date = parseInt($(this).find("td:eq(7)").text()); 
+        dates_count += date
+      });
+
+      $("#all_acts_count").text(acts_count)
+      $("#all_merchants_count").text(merchants_count)
+      $("#all_dates_count").text(dates_count);
+      
+      $("#search_location_button").removeClass("btn-danger").addClass("btn-primary").removeAttr('disabled');
+      $("#search_location_button").text("Search");
+    });
+  });

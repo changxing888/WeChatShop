@@ -1,0 +1,55 @@
+.row
+    .span4{style:'margin-left:0px;'}
+      %h3 Curate Photos for Merchant
+      %h5 
+        Merchant Name: #{@activity.merchant.name}        
+      %p
+        Activity Name: #{@activity.name}
+  .row.photo-row{style:'width:1500px'}
+    .row
+      %fieldset.span6
+        .row.pending-photos{style:'margin-left:0px;border: 1px solid #0000FF;padding: 0 5px;'}
+          - if @activity.pending_photos.count > 0
+            %h4 
+              Pending photos(#{@activity.pending_photos.count})
+            %ul#pending_bxslider
+              - @activity.pending_photos.each do |photo|
+                %li
+                  = link_to(x_image_tag(photo.img_url, style: 'width:200px;height:200px;'), "javascript://", :"data-id" => photo.id.to_s, :"data-img" => photo.img_url, :"data-submitted_by"=>photo.user.present? ? photo.user.name : 'Admin' , :"data-submitted_on"=>photo.created_at.present? ? photo.created_at.strftime("%m %d, %Y") : '', :"data-approved_by"=>photo.approved_user.present? ? photo.approved_user.name : "", :"data-approved_on"=>photo.approved_at.present? ? photo.approved_at.strftime("%m %d, %Y") : "", :"data-file_size"=>photo.file_size, class:'pendig-photo')
+      %fieldset.span6
+        .row.approved-photos{style:'margin-left:0px;border: 1px solid #0000FF;padding: 0 5px;'}
+          - if @activity.approved_photos.count > 0
+            %h4 
+              Approved photos(#{@activity.approved_photos.count})
+            %ul#approve_bxslider
+              - @activity.approved_photos.each do |photo|
+                %li
+                  = link_to(x_image_tag(photo.img_url, style: 'width:200px;height:200px;'), "javascript://", :"data-id" => photo.id.to_s, :"data-img" => photo.img_url, :"data-submitted_by"=>photo.user.present? ? photo.user.name : 'Admin', :"data-submitted_on"=>photo.created_at.present? ? photo.created_at.strftime("%m %d, %Y") : '', :"data-approved_by"=>photo.approved_user.present? ? photo.approved_user.name : "", :"data-approved_on"=>photo.approved_at.present? ? photo.approved_at.strftime("%m %d, %Y") : "", :"data-file_size"=>photo.file_size, :"data-thumb_img"=>@activity.second_img, class:'approved-photo')
+      .span2
+      %fieldset.span6
+        .row.rejected-photos{style:'margin-left:0px;border: 1px solid #0000FF;padding: 0 5px;'}
+          - if @activity.rejected_photos.count > 0
+            %h4 
+              Rejected photos(#{@activity.rejected_photos.count})
+            %ul#reject_bxslider
+              - @activity.rejected_photos.each do |photo|
+                %li
+                  = link_to(x_image_tag(photo.img_url, style: 'width:200px;'), 'javascript://', :"data-target" => "#reject_modal", :"data-toggle" => "modal")
+
+
+
+
+
+
+
+          %h4.pull-right
+            Rejected photos(#{act.rejected_photos.count})
+        %fieldset.span6{style:'display:none;'}
+          .row.rejected-photos{style:'margin-left:0px;border: 1px solid #0000FF;padding: 0 5px;'}
+            - if act.approved_photos.count > 0
+              %h4 
+                Rejected photos(#{act.approved_photos.count})
+              %ul#reject_bxslider
+                - act.approved_photos.each do |photo|
+                  %li
+                    = link_to(x_image_tag(photo.img_url, style: 'width:200px;height:200px;'), 'javascript://', :"data-target" => "#reject_modal", :"data-toggle" => "modal")

@@ -1,0 +1,394 @@
+.container
+  %br/
+  .row
+    .span4{style:'margin-left:0px;'}
+      %h3 Curate Photos for Merchant
+      %h5 
+        Merchant Name: 
+        = link_to(@merchant.name, edit_admin_merchant_path(@merchant))
+
+  - act = @merchant.activities.first #each do |act|
+  .row.photo-row{style:'overflow: hidden;'}
+    .row
+      .span3
+        %p
+          Activity Name: 
+          = link_to(act.name, admin_edit_activity_path(act))
+          
+      .span2
+        = link_to("Upload", "javascript://", class:'btn btn-mini', id:'upload_button')
+      %br
+      %br
+      
+      / = form_for @photo, :html => {:multipart => true} do |f|
+      /   = f.file_field :image
+      /   = f.hidden_field :logoable_id
+      /   = f.submit
+      %br
+      %br
+
+
+      %table
+        - act.logos.each do |logo|
+          %tr
+            %td
+              = x_image_tag logo.img_url, :id=>'uploadPreview_activity_logo_a', :style=>"width:220px;background:url('/assets/loaderA64.gif') no-repeat scroll 50px 40px;display:block", :alt=> '', class: 'select-img'
+            %td
+              %b
+                = "Image info:"
+                %br
+                - logo_state = logo.state.present? ? logo.state : "not found"
+                = "State: #{logo_state} "
+                
+              = "(Change to: "
+              = link_to ' PENDING ', {:controller => "activities", :action => "set_logo_state_pending", :logo_id => logo.id, :act_id => act.id, :state_change_at => Time.now, :state_change_user => current_user.id.to_s}, :method => "post" unless logo_state == 'pending'
+              = link_to ' APPROVED ', {:controller => "activities", :action => "set_logo_state_approved", :logo_id => logo.id, :act_id => act.id, :state_change_at => Time.now, :state_change_user => current_user.id.to_s}, :method => "post" unless logo_state == 'approved'
+              = link_to ' REJECTED', {:controller => "activities", :action => "set_logo_state_rejected", :logo_id => logo.id, :act_id => act.id, :state_change_at => Time.now, :state_change_user => current_user.id.to_s}, :method => "post" unless logo_state == 'rejected'
+              = ")"
+              %br
+              = "Size: #{FastImage.size(logo.img_url).first} x #{FastImage.size(logo.img_url).last}px"
+              %br
+              = "Filename: #{logo.logo_filename}"
+              %br
+              / - uploaded_user_info = logo.creator.present? ? logo.user.email : "not found"
+              - uploaded_user_info = logo.creator_email if logo.creator.present?
+              = "Created by: #{uploaded_user_info}"
+              %br
+              - _state_change_at = logo.state_change_at.in_time_zone("Pacific Time (US & Canada)").strftime("%A, %d %b %Y %l:%M %p") if logo.state_change_at? 
+              = "State Changed At: #{_state_change_at}"
+              %br
+              = "State Changed by: #{logo.state_changed_user.email}"
+              %br
+              - _updated_at = logo.updated_at.in_time_zone("Pacific Time (US & Canada)").strftime("%A, %d %b %Y %l:%M %p") if logo.updated_at?
+              = "Updated at: #{_updated_at}"
+              %br
+              = "Updated by: #{logo.last_updated_user.email}"
+              %br
+              = "Is cover: #{logo.is_cover}"   
+              - unless logo.is_cover
+                = link_to ' (SET AS COVER)', {:controller => "activities", :action => "set_logo_as_cover", :logo_id => logo.id}, :method => "post"
+              %br
+              = link_to 'DELETE PHOTO', {:controller => "activities", :action => "set_logo_as_destroy", :confirm=>'Are you sure?', :logo_id => logo.id}, :method => "post"
+      %br
+
+
+    .row{style:'overflow: auto'}
+      .image-container{style:'margin-left: 0px;'}
+        %fieldset#pending_photos_wraper.span6
+          .row.pending-photos{style:'margin-left:0px;padding: 0 5px;'}
+            - if act.pending_photos.count > 0
+              %h4 
+                Pending photos(#{act.pending_photos.count})
+              %ul#pending_bxslider.span6{style:'margin-left:0px;'}
+                - act.pending_photos.each do |photo|
+                  %li{id:"item_#{photo.id.to_s}"}
+                    %label &nbsp;
+                    - if photo.user.nil? or photo.user.role.present?
+                      %button.pull-right.close.photo-delete{"aria-hidden" => "true", :type => "button", style:'margin-top:-6px;margin-left: -12px;background:white;', data: {confirm: "Are you sure", id:photo.id.to_s}} &times;
+                    = link_to(x_image_tag(photo.img_url, style: 'width: 110px; height:196px;'), "javascript://", :"data-id" => photo.id.to_s, :"data-img" => photo.img_url, :"data-submitted_by"=>photo.user.present? ? photo.user.name : 'Admin' , :"data-submitted_on"=>photo.created_at.present? ? photo.created_at.strftime("%m %d, %Y") : '', :"data-approved_by"=>photo.state_changed_user.present? ? photo.state_changed_user.name : "", :"data-approved_on"=>photo.state_change_at.present? ? photo.state_change_at.strftime("%m %d, %Y") : "", :"data-file_size"=>photo.file_size, class:'pendig-photo')
+        %fieldset#approved_photos_wraper.span6
+          .row.approved-photos{style:'margin-left:0px;padding: 0 5px;'}
+            - if act.approved_photos.count > 0
+              %h4 
+                Approved photos(#{act.approved_photos.count})
+              %ul#approve_bxslider.span6{style:'margin-left:0px;'}
+                - act.approved_photos.each do |photo|
+                  %li.basic{"data-id" => photo.id, "data-act_id"=>act.id,id:"item_#{photo.id.to_s}"}
+                    - if photo.is_cover
+                      %label{style:'text-align:center;'} Cover
+                    - else
+                      %label &nbsp;
+                    - if photo.user.nil? or photo.user.role.present?
+                      %button.pull-right.close.photo-delete{"aria-hidden" => "true", "data-dismiss" => "modal", "data-id" => photo.id.to_s, :type => "button", style:'margin-top:-6px;margin-left: -12px;'} &times;
+                    = link_to(x_image_tag(photo.img_url, style: 'width: 110px; height:196px;'), "javascript://", :"data-id" => photo.id.to_s, :"data-img" => photo.img_url, :"data-submitted_by"=>photo.user.present? ? photo.user.name : 'Admin', :"data-submitted_on"=>photo.created_at.present? ? photo.created_at.strftime("%m %d, %Y") : '', :"data-approved_by"=>photo.state_changed_user.present? ? photo.state_changed_user : "", :"data-approved_on"=>photo.state_change_at.present? ? photo.state_change_at.strftime("%m %d, %Y") : "", :"data-file_size"=>photo.file_size, :"data-thumb_img"=>act.second_img, :"data-last_updated_by"=>photo.last_updated_user.present? ? photo.last_updated_user.name : "", :"data-last_updated_on"=>photo.state_change_at.present? ? photo.state_change_at.strftime("%m %d, %Y") : "", :"data-dam-slug-id"=>photo.original_file_name, class: "#{photo.is_cover? ? 'approved-photo' : 'gallery-photo'}")
+    .row
+      - if act.rejected_photos.count > 0
+        %h4.pull-right.show-reject-photos{style:'cursor: pointer;'}
+          Rejected photos(#{act.rejected_photos.count}) >>
+    .row{style:'margin-left: 0px;'}
+      %fieldset#rejected_photos_wraper.span10{style:'display:none;'}
+        .row.rejected-photos{style:'margin-left:0px;padding: 0 5px;'}
+          - if act.rejected_photos.count > 0
+            %h4 
+              Rejected photos(#{act.rejected_photos.count})
+            %ul#reject_bxslider
+              - act.rejected_photos.each do |photo|
+                %li{id:"item_#{photo.id.to_s}"}
+                  %label &nbsp;
+                  - if photo.user.nil? or photo.user.role.present?
+                    %button.pull-right.close.photo-delete{"aria-hidden" => "true", "data-dismiss" => "modal", "data-id" => photo.id.to_s, :type => "button", style:'margin-top:-6px;margin-left: -12px;'} &times;
+                  = link_to(x_image_tag(photo.img_url, style: 'width:110px; height:196px;'), "javascript://", :"data-id" => photo.id.to_s, :"data-img" => photo.img_url, :"data-submitted_by"=>photo.user.present? ? photo.user.name : 'Admin', :"data-submitted_on"=>photo.created_at.present? ? photo.created_at.strftime("%m %d, %Y") : '', :"data-approved_by"=>photo.state_changed_user.present? ? photo.state_changed_user.name : "", :"data-approved_on"=>photo.state_change_at.present? ? photo.state_change_at.strftime("%m %d, %Y") : "", :"data-file_size"=>photo.file_size, :"data-thumb_img"=>act.second_img, class:'rejected-photo')
+    .row
+      %h4.pull-right.hidden-reject-photos{style:'cursor: pointer;display:none'}
+        Hidde >>
+  
+/ Pending Modal
+#pendig_modal.modal.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1", style:"width:800px;display:none;z-index: 9999;"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        .row
+          .span4
+            %h4 TYPE: GALLERY
+          .span4
+            .span3
+              %span STATUS: 
+              = select_tag :photo_state, options_for_select(Logo::STATE.map{|state| [state.capitalize, state]}), style: 'width: 70%;'
+            .span1{style:'margin-left:0px;'}
+              %button.pull-right.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} &times;
+      .modal-body{style:'max-height:none;'}
+        .row{style:'margin-left:10px'}
+          .span4
+            .row{style:'margin-left:0'}
+              .span2{style:'margin-left:0'}
+                %p.submitted-by Submitted By:
+                %p.submitted-on Submitted On:                
+                %p.approved-by Approved By:
+                %p.approved-on Approved On:
+              .span2
+                %br/
+                %label DAM SLUG ID*
+                = text_field_tag :original_file_name, nil, class:'span2'
+                %p.file-size File Size:
+            .row{style:'margin-left:0'}
+              
+            .row{style:'margin-left:0'}
+              %h5 Reject Reason:
+              %textarea#reason{style:'width:350px;height:135px;'}
+            .row{style:'margin-left:0'}
+              /= link_to "REJECT", "javascript://", class:'btn', id:'btn_reject'
+          .span3{style:'margin-left: 30px;'}
+            .row{style:'margin-left:0px;'}
+              %img#pending_preview_img{style:"width: 250px; height: 446px;"}
+      .modal-footer        
+        = link_to "Update", "javascript://", class:'btn', id:'btn_approve'
+= render "approve_modal", :act => act
+/ Reject Modal
+#reject_modal.modal.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} &times;
+        %h4#myModalLabel.modal-title TYPE: REJECT
+      .modal-body
+        .row{style:'margin-left:0'}
+          .span4
+            %img#reject_preview_img{style:"width: 300px;"}
+      .modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal", :type => "button"} Close
+        %button#change_to_pending.btn.btn-primary{:type => "button"} Change to Pending
+/ Photo upload Modal
+#photo_upload_modal.modal.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1", style:'display:none'}
+  = form_tag("/admin/photos/upload_photo", multipart: true) do |f|
+    .modal-dialog
+      .modal-content
+        .modal-header
+          %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} &times;
+          %h4#myModalLabel.modal-title Upload Photo
+        .modal-body
+          .row{style:'margin-left:0'}
+            = hidden_field_tag 'activity_id', act.id.to_s
+            .span4
+              %img#uploadPreview_activity_logo.select-img{:style=>"width: 100%;z-index:99999", :src=>"data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%3F%3E%0A%3Csvg%20width%3D%22153%22%20height%3D%22153%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%0A%20%3Cg%3E%0A%20%20%3Ctitle%3ENo%20image%3C/title%3E%0A%20%20%3Crect%20id%3D%22externRect%22%20height%3D%22150%22%20width%3D%22150%22%20y%3D%221.5%22%20x%3D%221.500024%22%20stroke-width%3D%223%22%20stroke%3D%22%23666666%22%20fill%3D%22%23e1e1e1%22/%3E%0A%20%20%3Ctext%20transform%3D%22matrix%286.66667%2C%200%2C%200%2C%206.66667%2C%20-960.5%2C%20-1099.33%29%22%20xml%3Aspace%3D%22preserve%22%20text-anchor%3D%22middle%22%20font-family%3D%22Fantasy%22%20font-size%3D%2214%22%20id%3D%22questionMark%22%20y%3D%22181.249569%22%20x%3D%22155.549819%22%20stroke-width%3D%220%22%20stroke%3D%22%23666666%22%20fill%3D%22%23000000%22%3E%3F%3C/text%3E%0A%20%3C/g%3E%0A%3C/svg%3E", :alt=>"Image preview"} 
+              = file_field_tag 'attachment', id:'activity_logo', onchange: 'loadImageFile("activity_logo");validateFiles(this);',:data => {:max_file_size => 1.megabytes}, name: 'activity[logo]', style:'margin-top: -60px;opacity: 0;'
+        .modal-footer
+          %button.btn.btn-default{"data-dismiss" => "modal", :type => "button"} Close
+          = submit_tag "Upload", id: "upload_photo", class:"btn btn-primary", :disabled=>"disabled"
+          
+:css
+  .bx-wrapper{margin-bottom: 30px;}
+  .bx-wrapper .bx-controls-direction a {z-index: 99;}
+
+  #pending_bxslider li{list-style:none; float: left; margin: 2px;}
+  #approve_bxslider li{list-style:none; float: left; margin: 2px;}
+  #reject_bxslider li{list-style:none; float: left; margin: 2px;}
+:javascript
+
+  var photo_warper_width = $("#approved_photos_wraper").width();
+  $(".pendig-photo").click(function(){
+    var id = $(this).data("id");
+    var submitted_by = $(this).data("submitted_by");
+    var submitted_on = $(this).data("submitted_on");
+    var file_size    = $(this).data("file_size");
+    var approved_by  = $(this).data("approved_by");
+    var approved_on  = $(this).data("approved_on");
+
+    $("#pendig_modal .submitted-by").text("Submitted By: "+submitted_by);
+    $("#pendig_modal .submitted-on").text("Submitted On: "+submitted_on);
+    $("#pendig_modal .file-size").text("File Size: "+file_size);
+    $("#pendig_modal .approved-by").text("Approved By: "+approved_by);
+    $("#pendig_modal .approved-on").text("Approved On: "+approved_on);
+
+    $("#pending_preview_img").attr('src', $(this).data('img'));
+
+    $('#pendig_modal').modal({
+      keyboard: false
+    });
+
+    $("#btn_approve").click(function(){
+      var state = $("#photo_state").val();
+      var reason = $("#reason").val();
+      var original_file_name = $("#original_file_name").val();
+      $.ajax({
+        url:"/admin/photos/update_state",
+        dataType: "json",
+        type: "POST",
+        data: {id:id, state:state, reason:reason, original_file_name:original_file_name },
+        success: function(data){
+          alert(data["success"]);
+          window.location.reload(true);
+        }
+      });
+    });
+    
+    $("#btn_reject").click(function(){
+      var reason = $("#reason").val();
+      $.ajax({
+        url:"/admin/photos/reject",
+        dataType: "json",
+        type: "POST",
+        data: {id:id,reason:reason},
+        success: function(data){
+          alert(data["success"]);
+          window.location.reload(true);
+        }
+      });      
+    });
+
+  });
+
+
+  $(".rejected-photo").click(function(){
+    var id = $(this).data("id");    
+    $("#reject_preview_img").attr('src', $(this).data('img'));
+
+    $('#reject_modal').modal({
+      keyboard: false
+    });
+
+    $("#change_to_pending").click(function(){
+      $.ajax({
+        url:"/admin/photos/pending",
+        dataType: "json",
+        type: "POST",
+        data: {id:id},
+        success: function(data){
+          alert(data["success"]);
+          window.location.reload(true);
+        }
+      });
+    });    
+  });
+  
+  $("#approve_bxslider").sortable({
+    revert: true,
+    start: function(event, ui){
+      act_id = ui.item.data("act_id")
+    },
+    stop: function(event, ui){
+      url = "/admin/photos/change_order";
+      var ordered_ids = "";
+      var act_id = ui.item.data("act_id");
+      
+      $("#approve_bxslider li.basic").each(function(index){
+        if(index < $("#approve_bxslider li.basic").length-1){
+          ordered_ids = ordered_ids + $(this).data("id")+",";
+        }else{
+          ordered_ids = ordered_ids + $(this).data("id")
+        }
+      });
+
+      $(".approved-photos").append($("#approve_bxslider"));
+      $(".approved-photos .bx-wrapper").remove();
+      
+      $.post(url,{act_id:act_id,ordered_ids:ordered_ids}).done(function(dt){
+        console.log(dt);
+      })
+    }
+  });
+  $("ul, li").disableSelection();
+
+  $(".show-reject-photos").click(function(){    
+    $("#rejected_photos_wraper").css("display","block");    
+    $(".show-reject-photos").css("display","none");
+    $(".hidden-reject-photos").css("display","block");
+    
+  });
+
+  $(".hidden-reject-photos").click(function(){    
+    $("#rejected_photos_wraper").css("display","none");
+    $(".hidden-reject-photos").css("display","none");
+    $(".show-reject-photos").css("display","block");
+  });
+
+  $("#upload_button").click(function(){
+    $('#photo_upload_modal').modal({
+      keyboard: false
+    });
+  });
+
+  oFReader = new FileReader(), rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+   
+  oFReader.onload = function (oFREvent) {
+    document.getElementById(prev_img_id).src = oFREvent.target.result;
+  };
+
+  function loadImageFile(id) {
+    prev_img_id = "uploadPreview_"+id
+    if (document.getElementById(id).files.length === 0) { return; }
+    var oFile = document.getElementById(id).files[0];
+    if (!rFilter.test(oFile.type)) { alert("You must select a valid image file!"); return; }
+    oFReader.readAsDataURL(oFile);
+  }
+  $("#uploadPreview_activity_logo").click(function(){
+    $("#activity_logo").click();
+  });
+
+
+  $(document).ready(function(){
+  setTimeout(function(){
+  $('#flash_notice').remove(); $('.close').remove(); $('.alert').remove();
+  }, 5000);})
+
+  function validateFiles(inputFile) {
+    var maxExceededMessage = "This file exceeds the maximum allowed file size (1 MB)";
+    var extErrorMessage = "Only image file with extension: .jpg, .jpeg, .gif or .png is allowed";
+    var allowedExtension = ["jpg", "jpeg", "gif", "png", "JPG", "JPEG", "GIF", "PNG"];
+   
+    var extName;
+    var maxFileSize = $(inputFile).data('max-file-size');
+    var sizeExceeded = false;
+    var extError = false;
+    
+    $("#upload_photo").removeAttr("disabled");
+
+    $.each(inputFile.files, function() {
+      if (this.size && maxFileSize && this.size > parseInt(maxFileSize)) {sizeExceeded=true;};
+      extName = this.name.split('.').pop();
+      if ($.inArray(extName, allowedExtension) == -1) {extError=true;};
+    });
+
+    if (sizeExceeded) {
+      window.alert(maxExceededMessage);
+      $(inputFile).val('');
+      $("#upload_photo").attr("disabled","disabled");
+    };
+   
+    if (extError) {
+      window.alert(extErrorMessage);
+      $(inputFile).val('');
+      $("#upload_photo").attr("disabled","disabled");
+    };
+  }
+
+  $(".photo-delete").click(function(){
+    var id = $(this).data("id");
+    var url = "/admin/photos/delete";
+    var r = confirm("Are you sure");    
+    if (r==true){
+      $.post(url,{id:id}).done(function(dt){
+        $("#item_"+id).remove();
+        console.log(dt);
+      })
+    }
+  });

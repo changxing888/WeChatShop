@@ -1,0 +1,13 @@
+= simple_form_for @member, :url=>@url, :html => { :class => 'form-inline', :"data-validate" => "parsley", id: "import_new_activity_form", multipart: true } do |f|
+  .row
+    .span3.offset1
+      = f.input :role, collection: User::ROLES, input_html: {:"data-required"=>true}
+      = f.input :first_name, input_html: {:"data-required"=>true}
+      = f.input :last_name, input_html: {:"data-required"=>true}
+      = f.input :email, input_html: {:"data-required"=>true}
+    .span3
+      = f.input :password, input_html: {:"data-required"=>true}
+      = f.input :password_confirmation, input_html: {:"data-required"=>true}
+  .form-actions
+    = f.button :submit, "#{f.object.new_record? ? 'Create Member' : 'Update Member'}", :class => 'btn-primary offset2'
+    = link_to t('.cancel', :default => t("helpers.links.cancel")), admin_accounts_path, :class => 'btn'

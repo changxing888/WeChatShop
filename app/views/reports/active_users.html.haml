@@ -1,0 +1,27 @@
+.container.content-statistics
+  %h3 Content Statistics
+  .row.filter-options
+    .span6
+      .span2{style:'margin-left: 10px;'}
+        %label{style:'text-align: right;'} Date Range: Start
+      .span2{style:'margin-left: 10px;'}
+        = text_field_tag :start_date, "10/15/2013", :"data-behaviour"=>'datepicker', style:'width: 90%;'
+      .span2{style:'margin-left: 10px;'}
+        = text_field_tag :end_date, Time.now.to_date.strftime("%m/%d/%Y"), :"data-behaviour"=>'datepicker', style:'width: 90%;'
+    .span3
+      = link_to "Export to Excel", admin_reports_export_active_users_path(format: "csv")+"?st_date=10/15/2013&ed_date=#{Time.now.to_date.strftime("%m/%d/%Y")}", class: 'btn btn-default btn-export-active-user', :"data-no-turbolink"=>true
+
+
+:javascript
+  var export_url  = "#{admin_reports_export_active_users_path(format: "csv")}"
+  $("#start_date").change(function(){
+    url = export_url + '?st_date=' + $("#start_date").val() + '&ed_date=' + $("#end_date").val()
+    $(".btn-export-active-user").attr('href',url)    
+  });
+  
+  $("#end_date").change(function(){
+    url = export_url + '?st_date=' + $("#start_date").val() + '&ed_date=' + $("#end_date").val()
+    $(".btn-export-active-user").attr('href',url)
+  });
+
+  

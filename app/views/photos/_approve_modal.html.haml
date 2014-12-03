@@ -1,0 +1,323 @@
+
+/ Approve Modal
+#approve_modal.modal.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1", style:"width:800px;display:none;z-index: 9999;"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        .row
+          .span4
+            %h4 TYPE: COVER
+          .span4
+            .span3              
+            .span1{style:'margin-left:0px;'}
+              %button.pull-right.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} &times;
+      .modal-body{style:'max-height:none;height:600px;'}
+        .row{style:'margin-left:0'}
+          .span4{style:'margin-left:5px;'}
+            .row{style:'margin-left:0'}
+              .span2{style:'margin-left:0'}
+                %p.submitted-by Submitted By:
+                %p.submitted-on Submitted On:
+                %p.file-size File Size:
+                %p.approved-by Approved By:
+                %p.approved-on Approved On:
+                %p.last-updated-by Last Updated By:
+                %p.last-updated-on Last Updated On:
+              .span2
+                %br/
+                %label DAM SLUG ID*
+                = text_field_tag :approved_original_file_name, nil, class:'span2'
+                %p.file-size File Size:
+            .row{style:'margin-left:0'}
+              .span1{style:'margin-left: 0px;'}
+                %h4 Thumbnail:
+              .span2
+                = link_to "REDO", "javascript://", class:'btn', id:'btn_redo'
+            .row{style:'margin-left:0;'}
+              #preview_pane
+                .preview-container{style:'width: 250px; height:120px; overflow: hidden;'}
+                  %img#thumb_preview_img{style:"width:250px;height:120px;"}
+          .span4{style:'margin-left: 10px;'}
+            .row
+            = form_tag("/admin/photos/upload_photo", multipart: true, id:'upload_thumb_photo') do |f|
+              = hidden_field_tag :activity_id, act.id.to_s
+              = hidden_field_tag :type, 'thumb' 
+              %button#new_upload_button Upload new
+              = file_field_tag 'attachment', id:'activity_logo', onchange: 'loadThumbImageFile("activity_logo");validateThumbFiles(this);',:data => {:max_file_size => 0.5.megabytes}, name: 'activity[logo]', style:'margin-top:0px;opacity:0;width:10px;'
+
+            .row{style:'margin-left:0px;max-width:300px;'}
+              %img#approved_preview_img
+            .row
+              = hidden_field_tag 'x'
+              = hidden_field_tag 'y'
+              = hidden_field_tag 'w'
+              = hidden_field_tag 'h'
+      .modal-footer
+        %button#update_button.btn.btn-default{"data-dismiss" => "modal", :type => "button"} Update
+
+
+/ Gallery Modal
+#gallery_modal.modal.fade{"aria-hidden" => "true", "aria-labelledby" => "myModalLabel", :role => "dialog", :tabindex => "-1", style:"width:800px;display:none;z-index: 9999;"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        .row
+          .span4
+            %h4 TYPE: GALLERY
+          .span4
+            .span3
+              %span STATUS: 
+              = select_tag :gallery_photo_state, options_for_select(Logo::STATE.map{|state| [state.capitalize, state]}), style: 'width: 70%;'
+            .span1{style:'margin-left:0px;'}
+              %button.pull-right.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} &times;
+      .modal-body{style:'max-height:none;'}
+        .row{style:'margin-left:10px'}
+          .span4
+            .row{style:'margin-left:0'}
+              .span2{style:'margin-left:0'}
+                %p.submitted-by Submitted By:
+                %p.submitted-on Submitted On:                
+                %p.last-updated-by Last Updated By:
+                %p.last-updated-on Last Updated On:
+                %p.approved-by Approved By:
+                %p.approved-on Approved On:
+              .span2
+                %br/
+                %label DAM SLUG ID*
+                = text_field_tag :gallery_original_file_name, nil, class:'span2'
+                %p.file-size File Size:
+            .row{style:'margin-left:0'}
+              = link_to "Promote to Cover", "javascript://", class:'btn', id:'btn_promote_to_cover'
+            .row{style:'margin-left:0'}
+              
+            .row{style:'margin-left:0'}
+              /= link_to "REJECT", "javascript://", class:'btn', id:'btn_reject'
+          .span3{style:'margin-left: 30px;'}
+            .row{style:'margin-left:0px;'}
+              %img#gallery_preview_img{style:"width: 250px; height: 446px;"}
+      .modal-footer        
+        = link_to "Update", "javascript://", class:'btn', id:'btn_update_photo_state'
+:javascript
+  var id = '';
+  $(".approved-photo").dblclick(function(){
+    id        = $(this).data("id");
+    img       = $(this).data('img');
+    thumb_img = $(this).data('thumb_img');
+
+    var submitted_by = $(this).data("submitted_by");
+    var submitted_on = $(this).data("submitted_on");
+    var file_size    = $(this).data("file_size");
+    var approved_by  = $(this).data("approved_by");
+    var approved_on  = $(this).data("approved_on");
+    
+    var last_updated_by = $(this).data("last-updated-by");
+    var last_updated_on = $(this).data("last-updated-on");
+    var original_file_name     = $(this).data("dam-slug-id");
+
+    JcropAPI = $("#approved_preview_img").data('Jcrop');
+    if(JcropAPI){
+      JcropAPI.destroy();
+    }
+
+    $("#approve_modal .submitted-by").text("Submitted By: "+submitted_by);
+    $("#approve_modal .submitted-on").text("Submitted On: "+submitted_on);
+    $("#approve_modal .file-size").text("File Size: "+file_size);
+    $("#approve_modal .approved-by").text("Approved By: "+approved_by);
+    $("#approve_modal .approved-on").text("Approved On: "+approved_on);
+    
+    $("#approve_modal .last-updated-by").text("Last Updated By: "+last_updated_by);
+    $("#approve_modal .last-updated-on").text("Last Updated On: "+last_updated_on);
+
+    $("#approved_original_file_name").val(original_file_name);
+
+
+    $("#approved_preview_img").attr('src', $(this).data('img'));
+    $("#thumb_preview_img").attr('src', thumb_img);
+
+    $('#approve_modal').modal({
+      keyboard: false
+    });
+
+    boundx = 0
+    boundy = 0
+    $preview = $("#preview_pane")
+    $pcnt = $("#preview_pane .preview-container")
+    $pimg = $("#preview_pane .preview-container img")
+    xsize = $pcnt.width();
+    ysize = $pcnt.height();
+
+
+    $("#approved_preview_img").Jcrop({
+      onChange: showPreview,
+      boxWidth: 300,
+      boxWidth: 446,
+      aspectRatio: 2 / 1,
+      bgOpacity: .3,
+      onSelect: updateCoords
+    },function(){
+      var bounds = this.getBounds();
+      boundx = bounds[0];
+      boundy = bounds[1];
+      jcrop_api = this;
+    });
+
+    $("#btn_redo").click(function(){
+      $("#upload_thumb_photo").show();
+      $("#thumb_preview_img").attr('src', img);
+    });
+    
+    $("#new_upload_button").click(function(){
+      $("#activity_logo").click();
+      return false;
+    });
+
+  });  
+
+  function updateCoords(c)
+  {
+    $('#x').val(c.x);
+    $('#y').val(c.y);
+    $('#w').val(c.w);
+    $('#h').val(c.h);
+
+    console.log("coords", $("#x").val(), $("#y").val(), $("#w").val(), $("#h").val())
+  };
+
+  function checkCoords()
+  {
+    if (parseInt($('#w').val())) return true;
+    alert('Select where you want to Crop.');
+    return false;
+  };
+
+  function showPreview(coords){
+    if(parseInt(coords.w) > 0){
+      var rx = xsize / coords.w;
+      var ry = ysize / coords.h;
+
+      var img_width = $("#approved_preview_img").width();
+      var img_height = $("#approved_preview_img").height();
+      
+      $pimg.css({
+        width: Math.round(rx * boundx) + 'px',
+        height: Math.round(ry * boundy) + 'px',
+        marginLeft: '-' + Math.round(rx * coords.x) + 'px',
+        marginTop: '-' + Math.round(ry * coords.y) + 'px'
+      })
+    }
+  }
+
+  $("#update_button").click(function(){
+    if($("#activity_logo").val()){
+      $("#upload_thumb_photo").submit();
+    }else{
+      var data = new FormData();
+      $.ajax({
+        url:"/admin/photos/photo_crop",
+        dataType: "json",
+        contentType:'multipart/form-data',
+        type: "POST",
+        data: {id:id, x:$("#x").val(), y:$("#y").val(), w:$("#w").val(), h:$("#h").val()},
+        success: function(data){
+          alert(data["success"]);
+        }
+      });
+    }     
+  });
+
+
+  $(".gallery-photo").dblclick(function(){
+    
+    id = $(this).data("id");
+    var submitted_by    = $(this).data("submitted_by");
+    var submitted_on    = $(this).data("submitted_on");
+    var file_size       = $(this).data("file_size");
+    var approved_by     = $(this).data("approved_by");
+    var approved_on     = $(this).data("approved_on");
+    var last_updated_by = $(this).data("last-updated-by");
+    var last_updated_on = $(this).data("last-updated-on");
+    var original_file_name     = $(this).data("dam-slug-id");
+
+    $("#gallery_modal .submitted-by").text("Submitted By: "+submitted_by);
+    $("#gallery_modal .submitted-on").text("Submitted On: "+submitted_on);
+    $("#gallery_modal .file-size").text("File Size: "+file_size);
+    $("#gallery_modal .approved-by").text("Approved By: "+approved_by);
+    $("#gallery_modal .approved-on").text("Approved On: "+approved_on);
+    $("#gallery_modal .last-updated-by").text("Last Updated By: "+last_updated_by);
+    $("#gallery_modal .last-updated-on").text("Last Updated On: "+last_updated_on);
+
+    $("#gallery_original_file_name").val(original_file_name);
+
+
+    $("#gallery_preview_img").attr('src', $(this).data('img'));
+    
+    $('#gallery_modal').modal({
+      keyboard: false
+    });
+    $("#btn_update_photo_state").click(function(){
+      var state = $("#gallery_photo_state").val();
+      var reason = $("#reason").val();
+      var original_file_name = $("#gallery_original_file_name").val();
+      $.ajax({
+        url:"/admin/photos/update_state",
+        dataType: "json",
+        type: "POST",
+        data: {id:id, state:state, reason:reason, original_file_name:original_file_name },
+        success: function(data){
+          alert(data["success"]);
+          window.location.reload(true);
+        }
+      });
+    });  
+
+  });  
+
+
+  oFReader = new FileReader(), rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+   
+  oFReader.onload = function (oFREvent) {
+    document.getElementById(prev_img_id).src = oFREvent.target.result;
+  };
+
+  function loadThumbImageFile(id) {
+  console.log(id);
+    prev_img_id = "thumb_preview_img";
+    if (document.getElementById(id).files.length === 0) { return; }
+    var oFile = document.getElementById(id).files[0];
+    if (!rFilter.test(oFile.type)) { alert("You must select a valid image file!"); return; }
+    oFReader.readAsDataURL(oFile);
+  }
+
+
+  function validateThumbFiles(inputFile) {    
+    var maxExceededMessage = "This file exceeds the maximum allowed file size (0.5 MB)";
+    var extErrorMessage = "Only image file with extension: .jpg, .jpeg, .gif or .png is allowed";
+    var allowedExtension = ["jpg", "jpeg", "gif", "png", "JPG", "JPEG", "GIF", "PNG"];
+   
+    var extName;
+    var maxFileSize = $(inputFile).data('max-file-size');
+    var sizeExceeded = false;
+    var extError = false;
+    
+    $("#upload_photo").removeAttr("disabled");
+
+    $.each(inputFile.files, function() {
+      if (this.size && maxFileSize && this.size > parseInt(maxFileSize)) {sizeExceeded=true;};
+      extName = this.name.split('.').pop();
+      if ($.inArray(extName, allowedExtension) == -1) {extError=true;};
+    });
+
+    if (sizeExceeded) {
+      window.alert(maxExceededMessage);
+      $(inputFile).val('');
+      $("#upload_photo").attr("disabled","disabled");
+    };
+   
+    if (extError) {
+      window.alert(extErrorMessage);
+      $(inputFile).val('');
+      $("#upload_photo").attr("disabled","disabled");
+    };
+  }
+
+  $("#upload_thumb_photo").hide();

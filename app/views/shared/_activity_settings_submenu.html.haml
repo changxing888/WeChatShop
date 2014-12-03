@@ -1,0 +1,64 @@
+.row.activity-settings-submenu
+  %ul
+    - if current_page?(admin_activity_settings_date_types_path) or current_page?(admin_activity_settings_date_type_path)
+      %li.active
+        = link_to "Date Types", admin_activity_settings_date_types_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Date Types", admin_activity_settings_date_types_path, class: 'btn'
+    
+    - if current_page?(admin_activity_settings_timeframes_path)
+      %li.active
+        = link_to "Timeframes", admin_activity_settings_timeframes_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Timeframes", admin_activity_settings_timeframes_path, class: 'btn'
+    
+    - if current_page?(admin_activity_settings_levels_path)
+      %li.active
+        = link_to "Levels", admin_activity_settings_levels_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Levels", admin_activity_settings_levels_path, class: 'btn'
+    
+    - if current_page?(admin_activity_settings_parts_of_days_path)
+      %li.active
+        = link_to "Parts of Day", admin_activity_settings_parts_of_days_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Parts of Day", admin_activity_settings_parts_of_days_path, class: 'btn'
+    
+    - if current_page?(admin_activity_settings_attires_path)
+      %li.active
+        = link_to "Attires", admin_activity_settings_attires_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Attires", admin_activity_settings_attires_path, class: 'btn'
+    
+    - if current_page?(admin_activity_settings_foods_path)
+      %li.active
+        = link_to "Foods", admin_activity_settings_foods_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Foods", admin_activity_settings_foods_path, class: 'btn'
+    - if current_page?(admin_activity_settings_meals_path)
+      %li.active
+        = link_to "Meals", admin_activity_settings_meals_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Meals", admin_activity_settings_meals_path, class: 'btn'
+    
+
+    - if current_page?(admin_activity_settings_costs_path)
+      %li.active
+        = link_to "Costs", admin_activity_settings_costs_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Costs", admin_activity_settings_costs_path, class: 'btn'
+
+    - if current_page?(admin_activity_settings_demographics_path)
+      %li.active
+        = link_to "Demographics", admin_activity_settings_demographics_path, class: 'btn btn-inverse'
+    - else
+      %li
+        = link_to "Demographics", admin_activity_settings_demographics_path, class: 'btn'
